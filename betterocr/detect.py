@@ -97,9 +97,26 @@ def detect_text(
         f"[context]: {options['context']}" if options["context"] else ""
     )
 
+    prompt = f"""Combine and correct OCR results {result_indexes_prompt}, using \\n for line breaks. Langauge is in {'+'.join(options['lang'])}. Remove unintended noise. Refer to the [context] keywords. 
+        Finally, translate the text of the poster, which summarizes 'title', 'summary', 'participants', 'start_date' and 'end_date', from English to Korean.
+        Answer in the JSON format {{
+     "title" : string,
+     "summary" : string,
+     "participants" : string,
+     "start_date" : yyyy-mm-dd,
+     "end_date" : yyyy-mm-dd
+    }}
+    Please leave unspecified items blank with ""
+    :
+    {result_prompt}
+    {optional_context_prompt}
+
+    """
+    '''
     prompt = f"""Combine and correct OCR results {result_indexes_prompt}, using \\n for line breaks. Langauge is in {'+'.join(options['lang'])}. Remove unintended noise. Refer to the [context] keywords. Answer in the JSON format {{data:<output:string>}}:
 {result_prompt}
 {optional_context_prompt}"""
+    '''
 
     prompt = prompt.strip()
 
@@ -127,11 +144,20 @@ def detect_text(
         **openai_options,
     )
     output = completion.choices[0].message.content
-    print("[*] LLM", output)
+    #print("[*] LLM", output)
+
+    only_comment = "{" + output.split("{", maxsplit=1)[-1].rsplit("}",maxsplit=1)[0] + "}"
+
+    print(only_comment)
+    data = json.loads(only_comment)
+
+    if data:
+        print(f"success : {data}")
+        return data
+
 
     result = extract_json(output)
     print(result)
-
     if "data" in result:
         return result["data"]
     if isinstance(result, str):
