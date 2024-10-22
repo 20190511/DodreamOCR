@@ -11,6 +11,7 @@ from .wrappers import (
     job_easy_ocr_boxes,
     job_tesseract,
     job_tesseract_boxes,
+    job_paddle_ocr
 )
 
 
@@ -35,8 +36,7 @@ def detect_async():
 
 def get_jobs(languages: list[str], boxes=False):
     jobs = [
-        job_easy_ocr if not boxes else job_easy_ocr_boxes,
-        job_tesseract if not boxes else job_tesseract_boxes,
+        job_paddle_ocr,
     ]
     # ko or en in languages
     if "ko" in languages or "en" in languages:
@@ -99,7 +99,7 @@ def detect_text(
 
     prompt = f"""Combine and correct OCR results {result_indexes_prompt}, using \\n for line breaks. Langauge is in {'+'.join(options['lang'])}. Remove unintended noise. Refer to the [context] keywords. 
         Finally, translate the text of the poster, which summarizes 'title', 'summary', 'participants', 'start_date' and 'end_date', from English to Korean.
-        Answer in the JSON format {{
+        Only Answer in the JSON format {{
      "title" : string,
      "summary" : string,
      "participants" : string,
@@ -146,7 +146,7 @@ def detect_text(
     output = completion.choices[0].message.content
     #print("[*] LLM", output)
 
-    only_comment = "{" + output.split("{", maxsplit=1)[-1].rsplit("}",maxsplit=1)[0] + "}"
+    only_comment = "{" + output.rsplit("{", maxsplit=1)[-1].rsplit("}",maxsplit=1)[0] + "}"
 
     print(only_comment)
     data = json.loads(only_comment)

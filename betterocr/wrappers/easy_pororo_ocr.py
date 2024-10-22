@@ -17,7 +17,6 @@ def default_ocr(_options):
     lang = parse_languages(_options["lang"])
     return EasyPororoOcr(lang)
 
-
 def job_easy_pororo_ocr(_options):
     image = load_with_filter(_options["path"])
 
