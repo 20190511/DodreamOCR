@@ -11,7 +11,7 @@ def job_paddle_ocr(_options):
         for element in item:
             props = element[-1][1]
             if props > 0.8:
-                text += f"\n{element[-1][0]}"
+                text += f"\n{element[-1][0]}" #dfd
 
     print("[*] job_easy_paddle_ocr", text)
     return text
